@@ -1,0 +1,14 @@
+section:first-child{
+    display: none;
+}
+p{
+    width: 300px;
+}
+
+img {
+    float: left;
+    width: 300px;
+    height: 400px;
+    padding: 20px;
+    
+}
