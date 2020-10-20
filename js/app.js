@@ -1,92 +1,117 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 "use strict";
-const arrOfKeyword= [];
+let temp= document.getElementById('photo-template');
+const arrOfKeyword = [];
+let allImages = [];
 function Image(image) {
     this.image_url = image.image_url;
     this.title = image.title;
     this.description = image.description;
     this.keyword = image.keyword;
     arrOfKeyword.push(this.keyword);
-    // this.horns=horns;
+    this.horns = image.horns;
+    allImages.push(this);
 }
+
 Image.prototype.render = function () {
-    let imageClone = $('#photo-template').clone();
-    imageClone.find('h2').text(this.title);
-    imageClone.find('img').attr('src', this.image_url);
-    imageClone.find('p').text(this.description);
-    imageClone.attr('class', this.keyword);
-    $('main').append(imageClone);
+    let templet = $('<section></section>');
+    templet.html(` <div class="{{keyword}}">
+    <h2>{{title}}</h2>
+    <img  src="{{image_url}}" alt="">
+    <p>{{description}}</p>
+    <p>{{horns}}</p>
+  </div>`);
+  
+  let convert = $(templet).html();
+ let html = Mustache.render(convert,this);
+ templet.html(html);
+ $('main').append(templet);
+
 };
-let options = () => {
-    for (let i = 0; i < arrOfKeyword.length; i++) {
-        let listOption = $(`<option value="${arrOfKeyword[i]}"id="${arrOfKeyword[i]}" >${arrOfKeyword[i]}</option>`);
-        $("select").append(listOption);
-    }
-}
+
 const ajaxSettings = {
     method: 'get',
     dataType: 'json'
 };
-$('select').on('change', function (event) {
-    if (event.target.value !== $('#select').attr('id')) {
-        for (let i = 0; i < arrOfKeyword.length; i++) {
-            if (event.target.value === arrOfKeyword[i] || event.target.value === 'default') {
-                $(`.${arrOfKeyword[i]}`).show();
-            }
-            else {
-                $(`.${arrOfKeyword[i]}`).hide();
-            }
-        }
+
+$('select').change(showon=> {
+let selectOption =showon.target.value
+$('div').hide();
+$(`.${selectOption}`).show();
+
+});
+
+$('#page1').click(firstPage) 
+    // $.Mustache.clear();
+    // if (event.target.id === 'page1') {
+        function firstPage (){
+
+            allImages=[];
+        $('section').empty();
+        // temp.innerHTML='';
+        $.ajax('data/data.json', ajaxSettings).then((data) => {
+            data.forEach(imageObj => {
+                let image = new Image(imageObj);
+                image.render();
+                console.log(allImages);
+                let listOption = $(`<option value="${imageObj.keyword}"id="${imageObj.keyword}" >${imageObj.keyword}</option>`);
+                        $("select").append(listOption);
+            });
+           
+        });
     }
-});
-$.ajax('data/data.json', ajaxSettings).then((data) => {
-    console.log(data);
-    data.forEach(imageObj => {
-        let image = new Image(imageObj);
-        console.log(image);
-        image.render();
-        // image.choices();
+   
+       
+ $('#page2').click(secondPage) 
+        function secondPage(){
+            allImages=[];
+            $('section').empty();
+            // temp.innerHTML='';
+       
+        $.ajax('data/page.json', ajaxSettings).then((data) => {
+            data.forEach(imageObj => {
+                let image = new Image(imageObj);
+                image.render();
+                console.log(allImages);
+                let listOption = $(`<option value="${imageObj.keyword}"id="${imageObj.keyword}" >${imageObj.keyword}</option>`);
+                $("select").append(listOption);
+            });
+        });
+    }
+
+$('#hornes').click(sortByHornes)
+function sortByHornes(){
+    $('section').empty();
+    allImages.sort((a,b)=>
+        a.horns-b.horns
+       
+        ) 
+        allImages.forEach(num=>{
+            let sortedImages= new Image(num);
+            sortedImages.render();
+
     });
-    options();
-});
+   
+}
 
+$('#alpha').click(sortByTitle)
+function sortByTitle(){
+    $('section').empty();
+    allImages.sort((a,b)=>{
+        if (a.title>b.title ){
+            return  1;
+        }else if (a.title<b.title){
+            return  -1;
+        }else {
+            return 0
+        }
+    }  ) 
+        allImages.forEach(num=>{
+            let sortedImages= new Image(num);
+            sortedImages.render();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    });
+   
+}
 
 
 
